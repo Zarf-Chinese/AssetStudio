@@ -96,12 +96,16 @@ namespace AssetStudioGUI
             return extractedCount;
         }
 
+        /// <summary>
+        /// 收集Asset数据，包括文件名等
+        /// </summary>
+        /// <returns></returns>
         public static (string, List<TreeNode>) BuildAssetData()
         {
             StatusStripUpdate("Building asset list...");
 
             string productName = null;
-            var assetsNameHash = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             var objectCount = assetsManager.assetsFileList.Sum(x => x.Objects.Count);
             var objectAssetItemDic = new Dictionary<Object, AssetItem>(objectCount);
             int i = 0;
@@ -190,10 +194,10 @@ namespace AssetStudioGUI
                         assetItem.Text = assetItem.TypeString + assetItem.UniqueID;
                     }
                     //处理同名文件
-                    if (!assetsNameHash.Add(assetItem.TypeString + assetItem.Text))
-                    {
-                        assetItem.Text += assetItem.UniqueID;
-                    }
+                    //if (!assetsNameHash.Add(assetItem.TypeString + assetItem.Text))
+                    //{
+                    //    assetItem.Text += assetItem.UniqueID;
+                    //}
                     //处理非法文件名
                     assetItem.Text = FixFileName(assetItem.Text);
                     if (Properties.Settings.Default.displayAll || exportable)
@@ -221,7 +225,7 @@ namespace AssetStudioGUI
                 containers?.Clear();
             }
             visibleAssets = exportableAssets;
-            assetsNameHash.Clear();
+            
 
             StatusStripUpdate("Building tree structure...");
 
@@ -372,7 +376,7 @@ namespace AssetStudioGUI
                             }
                             break;
                         case 2: //source file
-                            exportPath = Path.Combine(savePath, asset.SourceFile.fullName + "_export");
+                            exportPath = Path.Combine(savePath, Path.GetFileNameWithoutExtension( asset.SourceFile.originalPath));
                             break;
                         default:
                             exportPath = savePath;
@@ -618,6 +622,10 @@ namespace AssetStudioGUI
             }
 
             return scriptDumper.DumpScript(reader);
+        }
+        public static void ExportArknightsSpineFiles(string exportPath)
+        {
+
         }
     }
 }

@@ -1395,6 +1395,11 @@ namespace AssetStudioGUI
             }
         }
 
+
+        private void exportArknightsSpineDatas(object sender, EventArgs e)
+        {
+            ExportArknightsSpineDatas();
+        }
         private List<AssetItem> GetSelectedAssets()
         {
             var selectedAssets = new List<AssetItem>(assetListView.SelectedIndices.Count);
@@ -1461,6 +1466,23 @@ namespace AssetStudioGUI
                             break;
                     }
                     Studio.ExportAssets(saveFolderDialog1.Folder, toExportAssets, exportType);
+                }
+            }
+            else
+            {
+                StatusStripUpdate("No exportable assets loaded");
+            }
+        }
+
+        private void ExportArknightsSpineDatas()
+        {
+            if (exportableAssets.Count > 0)
+            {
+                var saveFolderDialog1 = new OpenFolderDialog();
+                if (saveFolderDialog1.ShowDialog(this) == DialogResult.OK)
+                {
+                    timer.Stop();
+                    Studio.ExportArknightsSpineFiles(saveFolderDialog1.Folder);
                 }
             }
             else

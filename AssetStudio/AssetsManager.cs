@@ -107,6 +107,7 @@ namespace AssetStudio
                             }
                         }
                     }
+                    
                 }
                 catch
                 {
