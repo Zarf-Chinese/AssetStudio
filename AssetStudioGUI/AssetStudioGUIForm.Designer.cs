@@ -998,6 +998,7 @@ namespace AssetStudioGUI
             this.generateSpineDataToolStripMenuItem.Name = "generateSpineDataToolStripMenuItem";
             this.generateSpineDataToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
             this.generateSpineDataToolStripMenuItem.Text = "Generate Spine Data";
+            this.generateSpineDataToolStripMenuItem.Click += new System.EventHandler(this.exportArknightsSpineDatas);
             // 
             // AssetStudioGUIForm
             // 

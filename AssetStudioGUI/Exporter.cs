@@ -111,6 +111,11 @@ namespace AssetStudioGUI
         {
             var m_TextAsset = (TextAsset)(item.Asset);
             var extension = ".txt";
+            //如果为skel，则以Bytes类型导出
+            if (item.Text.EndsWith(".skel"))
+            {
+                extension = ".bytes";
+            }
             if (Properties.Settings.Default.restoreExtensionName)
             {
                 if (!string.IsNullOrEmpty(item.Container))
@@ -307,6 +312,7 @@ namespace AssetStudioGUI
             while (ExportFileExists(exportFullName))
             {
                 exportFullName= exportPath + itemText + " #"+uniqueIndex+ apFix;
+                uniqueIndex++;
             }
             return exportFullName;
         }

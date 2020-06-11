@@ -10,6 +10,7 @@ namespace AssetStudio
         public SerializedFile assetsFile;
         public ObjectReader reader;
         public long m_PathID;
+        public long m_Position;
         public int[] version;
         protected BuildType buildType;
         public BuildTarget platform;
@@ -21,6 +22,7 @@ namespace AssetStudio
         {
             this.reader = reader;
             reader.Reset();
+            this.m_Position = reader.Position;
             assetsFile = reader.assetsFile;
             type = reader.type;
             m_PathID = reader.m_PathID;
@@ -29,7 +31,6 @@ namespace AssetStudio
             platform = reader.platform;
             serializedType = reader.serializedType;
             byteSize = reader.byteSize;
-
             if (platform == BuildTarget.NoTarget)
             {
                 var m_ObjectHideFlags = reader.ReadUInt32();

@@ -26,7 +26,6 @@ namespace AssetStudioGUI
         public static List<AssetItem> exportableAssets = new List<AssetItem>();
         public static List<AssetItem> visibleAssets = new List<AssetItem>();
         internal static Action<string> StatusStripUpdate = x => { };
-
         public static void ExtractFile(string[] fileNames)
         {
             ThreadPool.QueueUserWorkItem(state =>
@@ -623,9 +622,86 @@ namespace AssetStudioGUI
 
             return scriptDumper.DumpScript(reader);
         }
+        public static string GetScriptString(AssetItem item)
+        {
+            var mono = item.Asset as MonoBehaviour;
+            return mono.Dump() ?? GetScriptString( mono.reader);
+        }
         public static void ExportArknightsSpineFiles(string exportPath)
         {
-
+            var characterItems = exportableAssets.FindAll((AssetItem item) => {
+                return item.Text == "Character";
+            });
+            var assetsToExport = new List<AssetItem>();
+            foreach (var item in characterItems) {
+                assetsToExport.AddRange (GetCharacterSpineAssets(item));
+            }
+            ExportAssets(exportPath, assetsToExport, ExportType.Convert);
         }
+        static List<AssetItem> GetCharacterSpineAssets(AssetItem item)
+        {
+            exportableAssets.Sort((AssetItem a, AssetItem b) =>
+            {
+                return (int)(a.Asset.m_Position- b.Asset.m_Position);
+            });
+            var assets = new List<AssetItem>();
+            var abName = Path.GetFileNameWithoutExtension(item.SourceFile.originalPath);
+            StatusStripUpdate($"Try getting character assets from  {abName}");
+            var characterContent = GetScriptString(item);
+            //从Character获取Animator
+            var animatorAsset = FindItemByPathId(characterContent, "$UnitAnimator");
+            var animatorContent = GetScriptString(animatorAsset);
+            //从Animator获取默认Skel动画
+            var frontSkel = FindItemByPathId(animatorContent, "$SkeletonAnimation");
+            var frontSkelContent = GetScriptString(frontSkel);
+            //获取SkelAsset
+            var skelAsset= FindItemByPathId(frontSkelContent, "$SkeletonDataAsset");
+            var skelAssetContent = GetScriptString(skelAsset);
+            //获取atlas配置
+            var atlasAsset = FindItemByPathId(skelAssetContent, "$AtlasAsset");
+            var atlasAssetContent = GetScriptString(atlasAsset);
+            //获取atlas数据
+            var atlasData = FindItemByPathId(atlasAssetContent, "atlasFile");
+            assets.Add(atlasData);
+            //获取skel数据
+            var skelData = FindItemByPathId(skelAssetContent, "skeletonJSON");
+            assets.Add(skelData);
+            var tex_mains = exportableAssets.FindAll((AssetItem _item) =>
+              {
+                  return _item.Text == abName;
+              });
+            assets.AddRange(tex_mains);
+            var tex_alphas = exportableAssets.FindAll((AssetItem _item) =>
+            {
+                return _item.Text == abName+"[alpha]";
+            });
+            assets.AddRange(tex_alphas);
+
+            return assets;
+        }
+        static AssetItem FindItemByPathId(string scriptContent, string key)
+        {
+            var keyIndex = scriptContent.IndexOf(key);//截取关键词的index
+            if (keyIndex >= 0)
+            {
+                var pathIndex=scriptContent.IndexOf("m_PathID = ", keyIndex);//截取符的index
+                if (pathIndex >= 0)
+                {
+                    var pathEndIndex = scriptContent.IndexOf("\n", pathIndex);
+                    var length = pathEndIndex - pathIndex - 12;//截取长度
+                    if (length > 0)
+                    { 
+                        var path_id=scriptContent.Substring(pathIndex + 11, length);
+                        var result=exportableAssets.Find((AssetItem item) =>
+                        {
+                            return item.m_PathID.ToString().Equals(path_id);//根据path_id查找item
+                        });
+                        return result;
+                    }
+                }
+            }
+            return null;
+        }
+        
     }
 }

@@ -10,6 +10,7 @@ namespace AssetStudioGUI
         public string Container = string.Empty;
         public string TypeString;
         public long m_PathID;
+        public long m_Position;
         public long FullSize;
         public ClassIDType Type;
         public string InfoText;
